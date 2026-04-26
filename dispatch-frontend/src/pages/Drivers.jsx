@@ -1,108 +1,122 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { 
-  Users, 
-  Mail, 
-  UserCheck, 
-  AlertCircle, 
-  Loader2,
-  RefreshCw
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import API from '../api';
+import { LayoutDashboard, LogOut, Truck, Users, Moon, Sun, UserPlus } from 'lucide-react';
 
 const Drivers = () => {
     const [drivers, setDrivers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-    // This is your live backend URL
-    const BACKEND_URL = 'https://logistics-backend-576i.onrender.com';
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        return localStorage.getItem('theme') === 'dark';
+    });
+
+    useEffect(() => { fetchDrivers(); }, []);
 
     const fetchDrivers = async () => {
-        setLoading(true);
         try {
-            // We are using the full URL to ensure it doesn't call the frontend by mistake
-            const response = await axios.get(`${BACKEND_URL}/api/auth/drivers`);
+            const response = await API.get('/auth/drivers');
             setDrivers(response.data);
-            setError(null);
-        } catch (err) {
-            console.error("Error fetching drivers:", err);
-            setError("Failed to load drivers. Ensure backend is running.");
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            if (error.response?.status === 401) handleLogout();
         }
     };
 
-    useEffect(() => {
-        fetchDrivers();
-    }, []);
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+    };
 
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-                <Loader2 className="w-10 h-10 animate-spin mb-2" />
-                <p>Connecting to Logistics Fleet...</p>
-            </div>
-        );
-    }
+    const toggleTheme = () => {
+        const newTheme = !isDarkMode;
+        setIsDarkMode(newTheme);
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    };
+
+    const theme = isDarkMode ? {
+        bg: '#0f172a', sidebar: '#020617', card: '#1e293b', 
+        text: '#f8fafc', textMuted: '#94a3b8', border: '#334155', hover: '#334155'
+    } : {
+        bg: '#f1f5f9', sidebar: '#1e293b', card: '#ffffff', 
+        text: '#0f172a', textMuted: '#64748b', border: '#e2e8f0', hover: '#f1f5f9'
+    };
 
     return (
-        <div className="p-6 bg-slate-900 min-h-screen text-white">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
-                        <Users className="text-blue-500" /> Fleet Drivers
-                    </h1>
-                    <p className="text-slate-400 mt-1">Manage your registered drivers and their contact info.</p>
+        <div style={{ display: 'flex', minHeight: '100vh', width: '100%', background: theme.bg, fontFamily: 'Inter, sans-serif', transition: 'background 0.3s ease' }}>
+            
+            {/* --- LEFT SIDEBAR --- */}
+            <div style={{ width: '260px', background: theme.sidebar, color: 'white', display: 'flex', flexDirection: 'column', padding: '20px 0', transition: 'background 0.3s ease' }}>
+                <div style={{ padding: '0 25px 20px 25px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '20px' }}>
+                    <Truck size={28} color="#3b82f6" />
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '800', letterSpacing: '-0.5px' }}>Logistics<span style={{ color: '#3b82f6' }}>Pro</span></h2>
                 </div>
-                <button 
-                    onClick={fetchDrivers}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition"
-                >
-                    <RefreshCw className="w-4 h-4" /> Refresh
-                </button>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', padding: '0 15px', flex: 1 }}>
+                    <div onClick={() => navigate('/dashboard')} style={{ color: '#94a3b8', padding: '12px 15px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '500', cursor: 'pointer', transition: 'background 0.2s' }}>
+                        <LayoutDashboard size={18} /> Active Loads
+                    </div>
+                    <div style={{ background: '#3b82f6', color: 'white', padding: '12px 15px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '600', cursor: 'pointer' }}>
+                        <Users size={18} /> Fleet Drivers
+                    </div>
+                </div>
+
+                <div style={{ padding: '0 15px' }}>
+                    <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        <LogOut size={18} /> Logout
+                    </button>
+                </div>
             </div>
 
-            {error && (
-                <div className="bg-red-900/20 border border-red-500/50 p-4 rounded-xl flex items-center gap-3 text-red-200 mb-6">
-                    <AlertCircle className="w-5 h-5" />
-                    {error}
-                </div>
-            )}
-
-            {drivers.length === 0 ? (
-                <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-20 text-center">
-                    <div className="bg-slate-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="text-slate-400 w-8 h-8" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">No Drivers Found</h3>
-                    <p className="text-slate-400">Register a new user with the role of "driver" to see them here.</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {drivers.map((driver) => (
-                        <div key={driver.id} className="bg-slate-800 border border-slate-700 p-6 rounded-2xl hover:border-blue-500/50 transition group">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="bg-blue-500/10 p-3 rounded-xl group-hover:bg-blue-500/20 transition">
-                                    <UserCheck className="text-blue-500 w-6 h-6" />
-                                </div>
-                                <span className="bg-green-500/10 text-green-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                    Active
-                                </span>
-                            </div>
-                            <h3 className="text-xl font-bold mb-1">{driver.name}</h3>
-                            <div className="flex items-center gap-2 text-slate-400 text-sm mb-4">
-                                <Mail className="w-4 h-4" />
-                                {driver.email}
-                            </div>
-                            <div className="pt-4 border-t border-slate-700">
-                                <button className="w-full bg-slate-700 hover:bg-blue-600 py-2 rounded-lg text-sm font-semibold transition">
-                                    View Driver Stats
-                                </button>
-                            </div>
+            {/* --- RIGHT MAIN CONTENT --- */}
+            <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+                <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                    
+                    {/* Header & Theme Toggle */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                        <div>
+                            <h1 style={{ margin: 0, fontSize: '28px', color: theme.text, fontWeight: '800', transition: 'color 0.3s ease' }}>Fleet Drivers</h1>
+                            <p style={{ margin: '5px 0 0 0', color: theme.textMuted, transition: 'color 0.3s ease' }}>Manage your registered drivers and their contact info.</p>
                         </div>
-                    ))}
+                        
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: theme.card, color: theme.text, border: `1px solid ${theme.border}`, borderRadius: '20px', cursor: 'pointer', fontWeight: '600', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.3s ease' }}>
+                                {isDarkMode ? <Sun size={18} color="#eab308" /> : <Moon size={18} color="#64748b" />}
+                                {isDarkMode ? 'Light' : 'Dark'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Drivers List */}
+                    <div style={{ background: theme.card, borderRadius: '12px', border: `1px solid ${theme.border}`, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden', transition: 'all 0.3s ease' }}>
+                        {drivers.length === 0 ? (
+                            <div style={{ padding: '60px 20px', textAlign: 'center', color: theme.textMuted }}>
+                                <UserPlus size={48} color={theme.textMuted} style={{ marginBottom: '10px', opacity: 0.5 }} />
+                                <h3>No Drivers Found</h3>
+                                <p>Register a new user with the role of "driver" to see them here.</p>
+                            </div>
+                        ) : (
+                            drivers.map((driver, index) => (
+                                <div key={driver.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 25px', borderBottom: index === drivers.length - 1 ? 'none' : `1px solid ${theme.border}` }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                        <div style={{ background: '#3b82f6', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '18px' }}>
+                                            {driver.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: '700', fontSize: '16px', color: theme.text, marginBottom: '4px' }}>{driver.name}</div>
+                                            <div style={{ color: theme.textMuted, fontSize: '13px', fontWeight: '500' }}>{driver.email}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '6px 12px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '20px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.5px' }}>
+                                        READY FOR DISPATCH
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
                 </div>
-            )}
+            </div>
         </div>
     );
 };
