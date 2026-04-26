@@ -38,7 +38,7 @@ const login = async (req, res) => {
 // --- 2. GET ALL DRIVERS FUNCTION ---
 const getAllDrivers = async (req, res) => {
     try {
-        const [drivers] = await db.query('SELECT id, name, email FROM users WHERE role = "driver"');
+        const [rows] = await db.query("SELECT id, name, email FROM users WHERE role = 'driver'");
         res.status(200).json(drivers);
     } catch (error) {
         console.error("Error fetching drivers:", error);
