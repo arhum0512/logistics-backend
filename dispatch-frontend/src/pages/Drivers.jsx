@@ -15,13 +15,15 @@ const Drivers = () => {
 
     const fetchDrivers = async () => {
         try {
-            const response = await API.get('/auth/drivers');
+            // We keep your original 'API' variable but add the /api/ prefix 
+            // OR use the full URL if 'API' is still acting up:
+            const response = await axios.get('https://logistics-backend-576i.onrender.com/api/auth/drivers');
             setDrivers(response.data);
         } catch (error) {
+            console.error("Error:", error);
             if (error.response?.status === 401) handleLogout();
         }
     };
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

@@ -11,7 +11,10 @@ const loadRoutes = require('./routes/loadRoutes'); // NEW
 const app = express();
 
 // --- MIDDLEWARE ---
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://logistics-frontend-ei0z.onrender.com'],
+  credentials: true
+}));
 app.use(express.json());
 
 // --- USE ROUTES ---
