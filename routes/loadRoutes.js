@@ -15,4 +15,13 @@ router.put('/assign', auth, loadController.assignDriver);
 // Route 4: Delete load (Protected)
 router.delete('/:id', auth, loadController.deleteLoad);
 
+// Import the new functions from your controller
+const { getMyLoads, markAsDelivered, ...otherExistingFunctions } = require('../controllers/loadController');
+
+// The driver fetches their own loads
+router.get('/my-loads', authMiddleware, getMyLoads);
+
+// The driver updates a load to delivered
+router.put('/deliver', authMiddleware, markAsDelivered);
+
 module.exports = router;

@@ -48,9 +48,39 @@ const deleteLoad = async (req, res) => {
     }
 };
 
+const getMyLoads = async (req, res) => {
+    try {
+        const driverId = req.user.id; 
+
+        const [rows] = await db.query(
+            `SELECT * FROM loads WHERE driver_id = ${driverId} AND status != 'delivered'`
+        );
+        
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Error fetching driver loads:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+const markAsDelivered = async (req, res) => {
+    const { loadId } = req.body;
+    try {
+        await db.query(
+            `UPDATE loads SET status = 'delivered' WHERE id = ${loadId}`
+        );
+        res.status(200).json({ message: "Load marked as delivered successfully" });
+    } catch (error) {
+        console.error("Error updating load status:", error);
+        res.status(500).json({ message: "Failed to update status" });
+    }
+};
+
 module.exports = {
     createLoad,
     getAllLoads,
     assignDriver,
-    deleteLoad
+    deleteLoad,
+    getMyLoads,
+    markAsDelivered
 };
