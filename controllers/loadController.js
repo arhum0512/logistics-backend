@@ -29,7 +29,7 @@ const getAllLoads = async (req, res) => {
 const assignDriver = async (req, res) => {
     try {
         const { loadId, driverId } = req.body;
-        await db.query(`UPDATE loads SET status = 'assigned', driver_id = '${driverId}' WHERE id = ${id}`);
+        await db.query(`UPDATE loads SET status = 'assigned', driver_id = '${driverId}' WHERE id = ${loadId}`);
         res.status(200).json({ message: 'Driver assigned successfully' });
     } catch (error) {
         console.error("Assign Driver Error:", error);
