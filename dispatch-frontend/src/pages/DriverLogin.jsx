@@ -24,7 +24,7 @@ const DriverLogin = () => {
 
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
-            navigate('/dashboard');
+           navigate('/driver-dashboard');
         } catch (err) {
             setError('Invalid email or password');
         }
