@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
-import { LayoutDashboard, LogOut, Truck, Users, Moon, Sun, UserPlus } from 'lucide-react';
+import { LayoutDashboard, LogOut, Truck, Users, Moon, Sun, UserPlus, Trash2 } from 'lucide-react'; // Added Trash2
 
 const Drivers = () => {
     const [drivers, setDrivers] = useState([]);
@@ -19,6 +19,19 @@ const Drivers = () => {
             setDrivers(response.data);
         } catch (error) {
             if (error.response?.status === 401) handleLogout();
+        }
+    };
+
+    // --- NEW DELETE FUNCTION ---
+    const handleDeleteDriver = async (id) => {
+        if (window.confirm("Are you sure you want to remove this driver from the fleet?")) {
+            try {
+                // Adjust the URL if your route is /loads/driver/:id or /users/:id
+                await API.delete(`/loads/driver/${id}`); 
+                setDrivers(drivers.filter(d => d.id !== id));
+            } catch (err) {
+                alert(err.response?.data?.message || "Failed to delete driver");
+            }
         }
     };
 
@@ -72,7 +85,6 @@ const Drivers = () => {
             <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
                 <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                     
-                    {/* Header & Theme Toggle */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                         <div>
                             <h1 style={{ margin: 0, fontSize: '28px', color: theme.text, fontWeight: '800', transition: 'color 0.3s ease' }}>Fleet Drivers</h1>
@@ -87,7 +99,6 @@ const Drivers = () => {
                         </div>
                     </div>
 
-                    {/* Drivers List */}
                     <div style={{ background: theme.card, borderRadius: '12px', border: `1px solid ${theme.border}`, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden', transition: 'all 0.3s ease' }}>
                         {drivers.length === 0 ? (
                             <div style={{ padding: '60px 20px', textAlign: 'center', color: theme.textMuted }}>
@@ -107,14 +118,25 @@ const Drivers = () => {
                                             <div style={{ color: theme.textMuted, fontSize: '13px', fontWeight: '500' }}>{driver.email}</div>
                                         </div>
                                     </div>
-                                    <div style={{ padding: '6px 12px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '20px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.5px' }}>
-                                        READY FOR DISPATCH
+                                    
+                                    {/* --- ACTION SECTION (Status + Delete) --- */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{ padding: '6px 12px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '20px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.5px' }}>
+                                            READY FOR DISPATCH
+                                        </div>
+                                        <button 
+                                            onClick={() => handleDeleteDriver(driver.id)}
+                                            style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: '0.2s', display: 'flex', alignItems: 'center' }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = isDarkMode ? '#450a0a' : '#fee2e2'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
                                     </div>
                                 </div>
                             ))
                         )}
                     </div>
-
                 </div>
             </div>
         </div>
