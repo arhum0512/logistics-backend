@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import API from '../api/axios'; // Make sure this path matches your API config file!
+import API from '../api';
 
 const DriverDashboard = () => {
     const [loads, setLoads] = useState([]);
@@ -25,7 +25,6 @@ const DriverDashboard = () => {
     const handleDeliver = async (loadId) => {
         try {
             await API.put('/loads/deliver', { loadId });
-            // Refresh the list so the delivered load disappears
             fetchMyLoads(); 
             alert("Load marked as delivered!");
         } catch (error) {
