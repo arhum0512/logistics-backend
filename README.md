@@ -1,51 +1,79 @@
-# LogisticsPro: Truck Dispatching Management System
+# 🚚 LogisticsPro: Fleet & Freight Management System
 
-A full-stack logistics management system for handling truck dispatch operations, fleet drivers, and load assignments. Built for the Professional Practices (PP) academic submission.
+## 📑 Overview
+LogisticsPro is a full-stack web application designed to streamline freight management and dispatch operations. It provides a centralized command center for administrators to create loads, assign them to fleet drivers, and manage personnel. Simultaneously, it offers a mobile-responsive, dark-mode-enabled portal for drivers to track their active assignments and confirm deliveries in real-time.
 
-## 🚀 Features
-- **Public Quote Generator:** Customers can submit load details and receive an instant price quote.
-- **Driver Onboarding:** Secure registration and login system for fleet drivers.
-- **Admin Dashboard:** Centralized command center to monitor all active, pending, and dispatched cargo.
-- **Assignment System:** Assign available drivers to pending loads with real-time UI updates.
-- **Full CRUD Operations:** Create loads, Read active loads/drivers, Update dispatch status, and Delete/cancel loads.
-- **Security:** JSON Web Tokens (JWT) for route protection and Bcrypt for password hashing.
-- **Theming:** Persistent Light/Dark mode via React State and LocalStorage.
+## ✨ Key Features
 
-## 🛠️ Technology Stack
-- **Frontend:** React.js, Vite, React Router DOM, Lucide-React (Icons)
-- **Backend:** Node.js, Express.js
-- **Database:** MySQL 8.4
-- **Security:** JWT (jsonwebtoken), Bcrypt.js
+### 🛡️ Admin Command Center
+* **Role-Based Access Control (RBAC):** Secure login exclusively for administrators.
+* **Freight Management:** Create new loads with automated quoting based on weight and origin/destination data.
+* **Dispatch Board:** View all pending, assigned, and delivered loads. Assign specific loads to registered drivers.
+* **Fleet Management:** View all registered drivers. Includes a "Safety Lock" deletion feature that prevents admins from deleting drivers who currently have active loads.
 
----
+### 📱 Driver Portal (Mobile-Ready)
+* **Dedicated Driver Login:** Automatically routes users with the `driver` role to their specific dashboard.
+* **Active Assignment Tracking:** Drivers only see the loads specifically assigned to their `driver_id`.
+* **One-Click Delivery:** Drivers can mark loads as 'Delivered', instantly updating the Admin Command Center.
+* **Persistent User Preferences:** Includes a local-storage-backed Light/Dark mode toggle for day and night driving conditions.
 
-## ⚙️ Local Setup Instructions
+## 🛠️ Tech Stack
+* **Frontend:** React.js, Vite, React Router, Lucide React (Icons).
+* **Backend:** Node.js, Express.js.
+* **Database:** MySQL (Hosted on **Aiven**).
+* **Authentication:** JSON Web Tokens (JWT) & bcrypt for secure password hashing.
+* **Deployment:** Fully deployed on **Render** (Both Client and API).
 
-### 1. Database Configuration
-1. Open your MySQL Command Line or Workbench.
-2. Create the database: `CREATE DATABASE truck_dispatch;`
-3. Use the database: `USE truck_dispatch;`
-4. Run the following SQL commands to set up the tables:
+## 🔒 Environment Variables
+To run this project locally, you will need to add the following environment variables to your `.env` file in the backend:
 
-```sql
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(50) DEFAULT 'driver'
-);
+```env
+PORT=5000
+DB_HOST=your_aiven_host_url
+DB_USER=your_aiven_username
+DB_PASSWORD=your_aiven_password
+DB_NAME=your_database_name
+DB_PORT=your_aiven_port
+JWT_SECRET=your_super_secret_jwt_key
+```
 
-CREATE TABLE loads (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    client_id INT,
-    origin VARCHAR(255) NOT NULL,
-    destination VARCHAR(255) NOT NULL,
-    weight DECIMAL(10,2) NOT NULL,
-    quote DECIMAL(10,2),
-    quote_price DECIMAL(10,2),
-    status VARCHAR(50) DEFAULT 'pending',
-    driver_id INT,
-    FOREIGN KEY (client_id) REFERENCES users(id),
-    FOREIGN KEY (driver_id) REFERENCES users(id)
-);
+## 📡 Core API Endpoints
+
+**Authentication Routes (`/api/auth`)**
+* `POST /register` - Register a new user (Admin/Driver)
+* `POST /login` - Authenticate user and return JWT
+* `GET /drivers` - Fetch all users with the 'driver' role
+
+**Load Management Routes (`/api/loads`)**
+* `POST /` - Create a new load
+* `GET /` - Fetch all loads (Admin)
+* `PUT /assign` - Assign a specific driver to a load
+* `DELETE /:id` - Remove a load
+
+**Driver-Specific Routes (`/api/loads`)**
+* `GET /my-loads` - Fetch loads assigned to the currently authenticated driver
+* `PUT /deliver` - Update load status to 'delivered'
+* `DELETE /driver/:id` - Delete a driver (includes safety checks for active loads)
+
+## 🚀 Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/yourusername/logistics-pro.git](https://github.com/yourusername/logistics-pro.git)
+   ```
+
+2. **Install Backend Dependencies:**
+   ```bash
+   cd backend
+   npm install
+   ```
+
+3. **Install Frontend Dependencies:**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+4. **Run the Application (Development Mode):**
+   * Open one terminal for the backend: `cd backend && npm run dev`
+   * Open a second terminal for the frontend: `cd frontend && npm run dev`
