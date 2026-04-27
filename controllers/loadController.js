@@ -1,5 +1,6 @@
 const db = require('../config/db');
 
+// 1. Create a new load (Public)
 const createLoad = async (req, res) => {
     try {
         const { origin, destination, weight } = req.body;
@@ -16,6 +17,7 @@ const createLoad = async (req, res) => {
     }
 };
 
+// 2. Get all loads (Admin)
 const getAllLoads = async (req, res) => {
     try {
         const [loads] = await db.query('SELECT * FROM loads ORDER BY id DESC');
@@ -26,6 +28,7 @@ const getAllLoads = async (req, res) => {
     }
 };
 
+// 3. Assign driver to load (Admin)
 const assignDriver = async (req, res) => {
     try {
         const { loadId, driverId } = req.body;
@@ -37,6 +40,7 @@ const assignDriver = async (req, res) => {
     }
 };
 
+// 4. Delete a load (Admin)
 const deleteLoad = async (req, res) => {
     try {
         const loadId = req.params.id; 
@@ -48,14 +52,13 @@ const deleteLoad = async (req, res) => {
     }
 };
 
+// 5. Get loads for the logged-in driver (Driver)
 const getMyLoads = async (req, res) => {
     try {
         const driverId = req.user.id; 
-
         const [rows] = await db.query(
             `SELECT * FROM loads WHERE driver_id = ${driverId} AND status != 'delivered'`
         );
-        
         res.status(200).json(rows);
     } catch (error) {
         console.error("Error fetching driver loads:", error);
@@ -63,6 +66,7 @@ const getMyLoads = async (req, res) => {
     }
 };
 
+// 6. Update load status to delivered (Driver)
 const markAsDelivered = async (req, res) => {
     const { loadId } = req.body;
     try {
@@ -76,11 +80,36 @@ const markAsDelivered = async (req, res) => {
     }
 };
 
+// 7. Delete a driver (Admin)
+const deleteDriver = async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Safety Check: Don't delete if they have assigned loads
+        const [activeLoads] = await db.query(
+            `SELECT * FROM loads WHERE driver_id = ? AND status = 'assigned'`, 
+            [id]
+        );
+
+        if (activeLoads.length > 0) {
+            return res.status(400).json({ 
+                message: "Cannot delete driver with active assigned loads." 
+            });
+        }
+
+        await db.query('DELETE FROM users WHERE id = ?', [id]);
+        res.status(200).json({ message: "Driver removed from system" });
+    } catch (error) {
+        console.error("Delete Driver Error:", error);
+        res.status(500).json({ message: "Error deleting driver" });
+    }
+};
+
 module.exports = {
     createLoad,
     getAllLoads,
     assignDriver,
     deleteLoad,
     getMyLoads,
-    markAsDelivered
+    markAsDelivered,
+    deleteDriver 
 };

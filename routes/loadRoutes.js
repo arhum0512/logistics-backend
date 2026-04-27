@@ -15,12 +15,13 @@ router.put('/assign', auth, loadController.assignDriver);
 // Route 4: Delete load (Admin)
 router.delete('/:id', auth, loadController.deleteLoad);
 
-// --- NEW DRIVER ROUTES ---
-
 // Route 5: The driver fetches their own loads
 router.get('/my-loads', auth, loadController.getMyLoads);
 
 // Route 6: The driver updates a load to delivered
 router.put('/deliver', auth, loadController.markAsDelivered);
+
+// Route 7: Delete Driver
+router.delete('/driver/:id', auth, loadController.deleteDriver);
 
 module.exports = router;
